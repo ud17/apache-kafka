@@ -33,3 +33,33 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
+  producer:
+    container_name: producer
+    build: ./producer
+    ports:
+      - 8080:8080
+    volumes:
+      - ./producer:/app
+    environment:
+      - PORT=8080
+      - POSTGRES_URL=postgres://postgres:postgres@postgres:5432/postgres
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=topic1
+    depends_on:
+      - postgres
+      - kafka
+  consumer:
+    container_name: consumer
+    build: ./consumer
+    ports:
+      - 8081:8080
+    volumes:
+      - ./consumer:/app
+    environment:
+      - PORT=8081
+      - MONGO_URL=mongodb://mongo:27017/consumer
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=topic1
+    depends_on:
+      - postgres
+      - kafka
