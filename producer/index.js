@@ -2,6 +2,7 @@ const express = require("express");
 const kafka = require("kafka-node");
 const sequelize = require("sequelize");
 const app = express();
+app.use(express.json());
 
 const dbsAreRunning = async () => {
     const db = new sequelize(process.env.POSTGRES_URL);
@@ -11,7 +12,7 @@ const dbsAreRunning = async () => {
         password: sequelize.STRING
     })
 
-    app.use(express.json());
+    db.sync({ force: true});
 
     const client = new kafka.KafkaClient({ kafkaHost: process.env.KAFKA_BOOTSTRAP_SERVERS});
     const producer = new kafka.Producer(client);

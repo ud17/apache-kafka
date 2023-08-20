@@ -13,13 +13,16 @@ services:
     volumes:
       - ./data/kafka:/var/run/docker.sock
     environment:
-      - KAFKA_ADVERTISED_HOST_NAME=kafka
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_PORT: 9092
   mongo:
     container_name: mongo
     image: mongo
     ports:
       - 27017:27017
+    networks:
+      - db-network
     volumes:
       - ./data/mongo:/data/db
   postgres:
@@ -53,13 +56,18 @@ services:
     build: ./consumer
     ports:
       - 8081:8080
+    networks:
+      - db-network
     volumes:
       - ./consumer:/app
     environment:
       - PORT=8081
-      - MONGO_URL=mongodb://mongo:27017/consumer
+      - MONGO_URL=mongodb://mongo:27017/consumer?directConnection=true
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_TOPIC=topic1
     depends_on:
       - postgres
       - kafka
+networks:
+  db-network:
+    driver: bridge
